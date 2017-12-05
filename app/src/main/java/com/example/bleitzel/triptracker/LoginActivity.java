@@ -20,7 +20,7 @@ import com.backendless.exceptions.BackendlessFault;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private final String APP_ID = "C16A2833-21B0-AD96-FF9B-E48452D25500";
+    private final String APP_ID = "C16A2833-21B0-Ad96-FF9B-E48452D25500";
     private final String SECRET_KEY = "8D534AA7-EC7B-A835-FFA9-7CE7B7CD9100";
     private EditText mNameEdit;
     private EditText mEmailEdit;
@@ -36,34 +36,27 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         mNameEdit = (EditText) findViewById(R.id.enter_name);
         mSignUpButton = (Button) findViewById(R.id.sign_up_button);
+        SignUpButtonOnClick signUpButtonOnClick = new SignUpButtonOnClick();
+        mSignUpButton.setOnClickListener(signUpButtonOnClick);
         mLoginButton = (Button) findViewById(R.id.login_button);
+        LoginButtonOnClick loginButtonOnClick = new LoginButtonOnClick();
+        mLoginButton.setOnClickListener(loginButtonOnClick);
         mSignUpTextView = (TextView) findViewById(R.id.sign_up_text);
-        SignUpTextOnClick signUpTextOnClick = new SignUpTextOnClick();
-        mSignUpTextView.setOnClickListener(signUpTextOnClick);
         mEmailEdit = (EditText) findViewById(R.id.enter_email);
         mPasswordEdit = (EditText) findViewById(R.id.enter_password);
+        SignUpTextOnClick signUpTextOnClick = new SignUpTextOnClick();
         mSignUpTextView.setOnClickListener(signUpTextOnClick);
-        Backendless.initApp(this, APP_ID, SECRET_KEY, "v1");
+        Backendless.initApp(this, APP_ID, SECRET_KEY);
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed(){
         mSignUpButton.setVisibility(View.GONE);
         mNameEdit.setVisibility(View.GONE);
         mLoginButton.setVisibility(View.VISIBLE);
         mSignUpTextView.setVisibility(View.VISIBLE);
     }
 
-    private class SignUpTextOnClick implements View.OnClickListener {
-
-        @Override
-        public void onClick(View view) {
-            mSignUpButton.setVisibility(View.VISIBLE);
-            mNameEdit.setVisibility(View.VISIBLE);
-            mLoginButton.setVisibility(View.GONE);
-            mSignUpTextView.setVisibility(View.GONE);
-        }
-    }
     public void warnUser(String message){
         AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
         builder.setMessage(message);
@@ -71,87 +64,6 @@ public class LoginActivity extends AppCompatActivity {
         builder.setPositiveButton(android.R.string.ok, null);
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
-
-    private class MySignUpOnClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            String userEmail = mEmailEdit.getText().toString();
-            String password = mPasswordEdit.getText().toString();
-            String name = mNameEdit.getText().toString();
-
-            userEmail = userEmail.trim();
-            password = password.trim();
-            name = name.trim();
-
-            if (!userEmail.isEmpty() && !password.isEmpty() && !name.isEmpty()) {
-                BackendlessUser user = null;
-
-                user.setEmail(userEmail);
-                user.setPassword(password);
-                user.setProperty("name", name);
-
-                Backendless.UserService.register(user,
-                        new AsyncCallback<BackendlessUser>() {
-                            @Override
-                            public void handleResponse(BackendlessUser backendlessUser) {
-                                Log.i(TAG, "Registration successful for " + backendlessUser.getEmail());
-                                Intent intent = new Intent(LoginActivity.this, TripListActivity.class);
-                                startActivity(intent);
-                            }
-
-                            @Override
-                            public void handleFault(BackendlessFault fault) {
-                                Log.i(TAG, "Registration failed: " + fault.getMessage());
-                            }
-                        });
-            } else {
-                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                builder.setMessage(R.string.empty_field_signup_error);
-                builder.setTitle(R.string.authentication_error_title);
-                builder.setPositiveButton(android.R.string.ok, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
-        }
-    }
-
-    private class LoginButtonOnClick implements  View.OnClickListener{
-
-        @Override
-        public void onClick(final View view) {
-            String email = mEmailEdit.getText().toString();
-            String password = mPasswordEdit.getText().toString();
-
-            email = email.trim();
-            password = password.trim();
-
-            if (!email.isEmpty() && !password.isEmpty()) {
-                final ProgressDialog pDialog = ProgressDialog.show(LoginActivity.this,
-                        "Please Wait!",
-                        "Logging in...",
-                        true);
-                Backendless.UserService.login(email, password,
-                        new AsyncCallback<BackendlessUser>() {
-                    @Override
-                    public void handleResponse(BackendlessUser response) {
-                        Toast.makeText(view.getContext(), response.getProperty("name") + " logged in successfully!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(LoginActivity.this, LoginActivity.class);
-                        startActivity(intent);
-                    }
-
-                    @Override
-                    public void handleFault(BackendlessFault fault) {
-                        warnUser(fault.getMessage());
-                        pDialog.dismiss();
-                    }
-                });
-
-            }
-            else{
-                warnUser(getString(R.string.empty_field_signup_error));
-            }
-        }
     }
 
     public boolean validateData(String email, String password){
@@ -172,6 +84,97 @@ public class LoginActivity extends AppCompatActivity {
             warnUser("Email address " + email + " doesn't follow standard address format. Please check and retype your email address.");
         }
         return false;
+    }
+
+    private class SignUpTextOnClick implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            mSignUpButton.setVisibility(View.VISIBLE);
+            mNameEdit.setVisibility(View.VISIBLE);
+            mLoginButton.setVisibility(View.GONE);
+            mSignUpTextView.setVisibility(View.GONE);
+        }
+    }
+
+    private class LoginButtonOnClick implements  View.OnClickListener{
+
+        @Override
+        public void onClick(final View view) {
+            String email = mEmailEdit.getText().toString();
+            String password = mPasswordEdit.getText().toString();
+            email = email.trim();
+            password = password.trim();
+            if (!email.isEmpty() && !password.isEmpty()) {
+                final ProgressDialog pDialog = ProgressDialog.show(LoginActivity.this,
+                        "Please Wait!",
+                        "Logging in...",
+                        true);
+                Backendless.UserService.login(email, password, new AsyncCallback<BackendlessUser>() {
+                    @Override
+                    public void handleResponse(BackendlessUser response) {
+                        Toast.makeText(view.getContext(), response.getProperty("name") + " logged in successfully!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(LoginActivity.this, TripListActivity.class);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault fault) {
+                        warnUser(fault.getMessage());
+                        pDialog.dismiss();
+                    }
+                });
+
+            }
+            else{
+                warnUser(getString(R.string.empty_field_signup_error));
+            }
+        }
+    }
+
+    private class SignUpButtonOnClick implements View.OnClickListener{
+
+        @Override
+        public void onClick(View view) {
+            String userEmail = mEmailEdit.getText().toString();
+            String password = mPasswordEdit.getText().toString();
+            String name = mNameEdit.getText().toString();
+
+            userEmail = userEmail.trim();
+            password = password.trim();
+            name = name.trim();
+
+            if (!userEmail.isEmpty() && !password.isEmpty() && !name.isEmpty()) {
+                if (validateData(userEmail, password)) {
+                    BackendlessUser newUser = new BackendlessUser();
+                    newUser.setEmail(userEmail);
+                    newUser.setPassword(password);
+                    newUser.setProperty("name", name);
+                    final ProgressDialog pDialog = ProgressDialog.show(LoginActivity.this,
+                            "Please Wait!",
+                            "Creating new account...",
+                            true);
+                    Backendless.UserService.register(newUser, new AsyncCallback<BackendlessUser>() {
+                        @Override
+                        public void handleResponse(BackendlessUser backendlessUser) {
+                            Log.i(TAG, "Successfully registered user: " + backendlessUser.getProperty("name"));
+                            Intent intent = new Intent(LoginActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                        }
+
+                        @Override
+                        public void handleFault(BackendlessFault backendlessFault) {
+                            pDialog.dismiss();
+                            warnUser(backendlessFault.getMessage());
+                        }
+                    });
+                }
+            }
+            else {
+                warnUser(getString(R.string.empty_field_signup_error));
+
+            }
+        }
     }
 
 }
