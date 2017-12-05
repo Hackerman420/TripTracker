@@ -1,18 +1,21 @@
 package com.example.bleitzel.triptracker;
 
+
 import java.util.Date;
 
 /**
  * Created by bleitzel on 11/16/2017.
  */
 
-public class Trip implements IntentData{
+public class Trip implements IntentData, Comparable{
+
     private String objectId;
     private String name;
     private String description;
     private Date startDate;
     private Date endDate;
     private boolean shared;
+    private String ownerId;
 
 
     public Trip(){
@@ -21,21 +24,13 @@ public class Trip implements IntentData{
     }
 
 
-    public String getObjectId() {
-        return objectId;
-    }
+    public String getObjectId() {return objectId;}
 
-    public void setObjectId(String objectId) {
-        this.objectId = objectId;
-    }
+    public void setObjectId(String objectId) {this.objectId = objectId;}
 
-    public String getName() {
-        return name;
-    }
+    public String getName() {return name;}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public void setName(String name) {this.name = name;}
 
     public String getDescription() {
         return description;
@@ -65,8 +60,12 @@ public class Trip implements IntentData{
         return shared;
     }
 
-    public void setShared(boolean shared) {
-        this.shared = shared;
-    }
-}
+    public void setShared(boolean shared) {this.shared = shared;}
 
+    public String getOwnerId() {return ownerId;}
+
+    public void setOwnerId(String ownerId) {this.ownerId = ownerId;}
+
+    @Override
+    public int compareTo(Object o) {return name.compareTo(((Trip)o).getName());}
+}
